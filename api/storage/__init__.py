@@ -17,9 +17,6 @@ def __init__(self):
             self.redis_client.ping()
             print("✅ Connected to Vercel KV")
         except Exception as e:
-            print(f"⚠️  Could not connect to Vercel KV: {e}")
-            print(f"Error type: {type(e).__name__}")
-            print("📝 Using local memory storage")
             self.redis_client = None
     else:
         print("📝 No KV credentials found - using local memory storage")

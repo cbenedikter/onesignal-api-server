@@ -16,7 +16,11 @@ class OTPRequest(BaseModel):
         example="+1234567890",
         description="Phone number with country code"
     )
-    
+    request_otp: bool = Field(
+        ...,
+        example='true',
+        description="must be 'true' to request an OTP"
+    )
     
 class VerifyOTPRequest(BaseModel):
     """Request to verify an OTP"""

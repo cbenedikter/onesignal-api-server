@@ -24,8 +24,11 @@ router = APIRouter(
 async def generate_otp(request: OTPRequest):
     """Generate a 5-digit OTP for a specific phone number"""
     
-    # TODO: Add phone number validation
-    # TODO: Add rate limiting (max OTPs per phone per hour)
+    if not request.request_otp:
+        return OTPResponse(
+            status="error",
+            message="request_otp must be 'true' to generate an OTP"
+        )
     
     try:
         # Generate the OTP using our service
