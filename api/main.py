@@ -13,7 +13,7 @@ from .routers import auth
 app = FastAPI(
     title="OneSignal API Server",
     description="Backend server for handling API logic and OneSignal integration",
-    version="2.0.0"
+    version="2.0.1"
 )
 
 # Configure CORS
@@ -46,8 +46,6 @@ def read_root():
 
 # Include routers
 app.include_router(auth.router)
-
-version="2.0.0"
 
 # Future routers can be added like this:
 # app.include_router(notifications.router)
