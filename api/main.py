@@ -5,8 +5,13 @@ This file sets up the app and includes all routers
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-
 from .routers import auth
+from .config import settings
+from .storage.kv_store import kv_store 
+
+print(f"KV configured: {settings.has_kv}")
+print(f"KV Store initialized: {kv_store is not None}")
+print(f"KV configured: {settings.has_kv}")
 
 
 # Create the FastAPI app
