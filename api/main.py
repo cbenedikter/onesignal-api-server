@@ -31,7 +31,7 @@ app.add_middleware(
 def read_root():
     """Welcome endpoint"""
     return {
-        "message": "Welcome to your OneSignal API Server!",
+        "message": "Welcome to Claudio's OneSignal API Server!",
         "version": "2.0.0",
         "status": "running",
         "endpoints": {
