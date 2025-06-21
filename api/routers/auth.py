@@ -3,7 +3,7 @@
 Authentication router - Handles all OTP-related HTTP endpoints
 """
 from fastapi import APIRouter, HTTPException
-
+from datetime import datetime
 from ..models.schemas import (
     OTPRequest, 
     VerifyOTPRequest, 
@@ -23,13 +23,14 @@ router = APIRouter(
 @router.post("/otp", response_model=OTPResponse)
 async def generate_otp(request: OTPRequest):
     """Generate a 5-digit OTP for a specific phone number"""
-    
+    print(f"Rquest: phone={request.phone_number}, request_otp={request.request_otp}")
     if not request.request_otp:
         return OTPResponse(
             status="error",
             message="request_otp must be 'true' to generate an OTP"
         )
-    
+        print(f"Response: {response.model_dump()}")
+        return response
     try:
         # Generate the OTP using our service
         code = await otp_service.generate_otp(request.phone_number)
@@ -40,15 +41,20 @@ async def generate_otp(request: OTPRequest):
         return OTPResponse(
             status="success",
             message=f"OTP sent to {request.phone_number}",
-            signal_code=code,  # Remove in production!
+            signal_code=code,  
             debug="In production, don't return the code!"
         )
+        print(f"Response: {response.model_dump()}")
+        return response
+    
+    
     except Exception as e:
         return OTPResponse(
             status="error",
             message=str(e)
         )
-
+        print(f" Error message: {response.model_dump()}")
+        return response
 
 @router.post("/verify", response_model=VerifyResponse)
 async def verify_otp(request: VerifyOTPRequest):
