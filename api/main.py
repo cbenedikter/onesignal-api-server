@@ -12,8 +12,8 @@ from .routers import auth
 # Create the FastAPI app
 app = FastAPI(
     title="OneSignal API Server",
-    description="Backend server for handling API logic and OneSignal integration",
-    version="2.0.1"
+    description="Claudio's backend server for handling API logic and OneSignal integration",
+    version="2.0.2"
 )
 
 # Configure CORS
