@@ -47,6 +47,8 @@ def read_root():
 # Include routers
 app.include_router(auth.router)
 
+version="2.0.0"
+
 # Future routers can be added like this:
 # app.include_router(notifications.router)
 # app.include_router(rules.router)
