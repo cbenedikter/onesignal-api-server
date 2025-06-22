@@ -14,9 +14,14 @@ load_dotenv()
 class Settings:
     """Application settings loaded from environment variables"""
     
-    # OneSignal Configuration
-    ONESIGNAL_APP_ID: Optional[str] = os.getenv("ONESIGNAL_APP_ID")
-    ONESIGNAL_API_KEY: Optional[str] = os.getenv("ONESIGNAL_API_KEY")
+    # OneSignal App and API Keys
+    signal_post_app_id: Optional[str] = os.getenv("signal_post_app_id")
+    signal_post_api_key: Optional[str] = os.getenv("signal_post_api_key")
+    emea_se_demo_app_id: Optional[str] = os.getenv("emea_se_demo_app_id")
+    emea_se_demo_api_key: Optional[str] = os.getenv("emea_se_demo_api_key")  
+
+    #OneSignal Teplate IDs
+    emea_se_demo_sms_otp: str = "a6f35326-6b86-4076-952c-1b3bbee7d391"
     
     # Vercel KV Configuration
     KV_URL: Optional[str] = os.getenv("KV_URL")
@@ -35,7 +40,7 @@ class Settings:
     @property
     def has_onesignal(self) -> bool:
         """Check if OneSignal is configured"""
-        return bool(self.ONESIGNAL_APP_ID and self.ONESIGNAL_API_KEY)
+        return True
     
     @property
     def has_kv(self) -> bool:

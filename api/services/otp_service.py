@@ -6,10 +6,11 @@ This is separate from the HTTP layer (routers)
 import random
 from datetime import datetime, timedelta
 from typing import Dict, Optional, Tuple
-
+from .one_signal_message_service import onesignal_message_service
 from ..models.schemas import StoredOTP
 from ..config import settings
 from ..storage.kv_store import kv_store
+
 
 
 class OTPService:
@@ -60,9 +61,14 @@ class OTPService:
         
         print(f"Generated OTP {code} for {phone_number}")
         
-        # TODO: Send via OneSignal if configured
+        # OTP Message via OneSignal
         if settings.has_onesignal:
-            print(f"Would send OTP via OneSignal to {phone_number}")
+            try:
+                await onesignal_message_service.send_sms_otp(phone_number, code, environment=2)
+                print(f"Send OTP {code} to {phone_number} successfully")
+            except Exception as e:
+                print(f"Failed to send OTP")
+
             # await send_onesignal_notification(phone_number, code)
         else:
             print("OneSignal not configured - OTP not sent")
