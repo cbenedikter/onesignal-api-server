@@ -35,7 +35,7 @@ class OTPService:
         rate_key = f"{self.rate_limit_prefix}{phone_number}"
         attempts = self.kv.get(rate_key) or 0
         
-        if attempts >= 3:
+        if attempts >= 60:
             raise Exception("Too many OTP requests. Please try again later.")
         
         # Generate random 5-digit code
