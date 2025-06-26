@@ -22,6 +22,10 @@ class Settings:
 
     #OneSignal Teplate IDs
     emea_se_demo_sms_otp: str = "a6f35326-6b86-4076-952c-1b3bbee7d391"
+    signal_post_delivery_pickup: str = "e403dea4-3b4d-4691-bc72-959da1857d2b"
+    signal_post_in_transit: str = "adf0c70e-68f1-4068-901b-bc5b78012f0d"
+    signal_post_delivered: str = "b638434a-03e4-4e78-9da2-a09b17edace2"
+
     
     # Vercel KV Configuration
     KV_URL: Optional[str] = os.getenv("KV_URL")

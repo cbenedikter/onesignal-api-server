@@ -4,6 +4,7 @@ import aiohttp
 import json
 from typing import Dict, Optional
 from ..config import settings
+from ..models.schemas import DeliveryRequest    
 
 
 class OneSignalMessageService:
@@ -49,15 +50,56 @@ class OneSignalMessageService:
         ### API Request
         async with aiohttp.ClientSession() as session:
             async with session.post(
-                self.base_url,  # Fixed typo: was "self.bsae_url"
+                self.base_url,
                 json=payload,
                 headers=headers
             ) as response:
                 response_data = await response.json()
                 print(f"Response from OneSignal: {response_data}")
-
+                return response_data
+                
+    ### Delivery Service Sequence
+    async def send_delivery_notification(self, request: DeliveryRequest, status: str, environment=1) -> Dict:
+        """Send Delivery Notification Sequence"""
+        template_mapping = {
+            "Delivery Pickup": settings.signal_post_delivery_pickup,
+            "In transit": settings.signal_post_in_transit,
+            "Delivered": settings.signal_post_delivered
+        }
+        
+        template_id = template_mapping.get(status)
+        if not template_id:
+            raise ValueError(f"Invalid status: {status}")
+        
+        payload = {
+            "app_id": getattr(self, f"app_id_{environment}"),
+            "include_aliases": {
+                "external_id": [request.external_id]
+            },
+            "target_channel": "push",
+            "template_id": template_id,
+            "custom_data": {
+                "tracking_id": request.tracking_id,
+                "parcel_destination": request.parcel_destination
+            }
+        }
+        
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Basic {getattr(self, f'api_key_{environment}')}"
+        }
+        
+        ### API Request
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                self.base_url,
+                json=payload,
+                headers=headers
+            ) as response:
+                response_data = await response.json()
+                print(f"Response from OneSignal: {response_data}")
                 return response_data
 
-
+            
 # Create singleton instance        
 onesignal_message_service = OneSignalMessageService()

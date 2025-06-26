@@ -18,7 +18,7 @@ class OTPRequest(BaseModel):
     )
     request_otp: bool = Field(
         ...,
-        example='true',
+        example=True,  # Changed from 'true' to True (no quotes for boolean)
         description="must be 'true' to request an OTP"
     )
     
@@ -33,6 +33,39 @@ class VerifyOTPRequest(BaseModel):
         ...,
         example="12345",
         description="The 5-digit OTP code"
+    )
+
+class DeliveryRequest(BaseModel):  # Fixed: BaseModel not baseModel
+    """Request to start Signal Post Parcel Delivery"""  # Fixed: proper quotes
+    external_id: str = Field(  # Fixed: added colon after external_id
+        ...,
+        example="YCYEL51G",
+        description="unique user id"
+    )
+    send_parcel: bool = Field(  # Fixed: added colon after send_parcel
+        ...,
+        example=True,  # Fixed: True not 'true'
+        description="must be 'true' to send a parcel"
+    )
+    parcel_destination: str = Field(  # Fixed: added colon after parcel_destination
+        ...,
+        example="Locker",
+        description="The destination of the parcel"  # Fixed typo: destination
+    )
+    parcel_size: str = Field(
+        ...,
+        example="Medium",
+        description="Size of the parcel (Small, Medium, Large)"
+    )
+    parcel_description: str = Field(
+        ...,
+        example="Books",
+        description="Description of the parcel contents"
+    )
+    tracking_id: str = Field(
+        ...,
+        example="123456",
+        description="Tracking ID for the parcel"
     )
 
 
