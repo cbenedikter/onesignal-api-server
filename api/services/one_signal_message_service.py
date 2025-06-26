@@ -61,6 +61,13 @@ class OneSignalMessageService:
     ### Delivery Service Sequence
     async def send_delivery_notification(self, request: DeliveryRequest, status: str, environment=1) -> Dict:
         """Send Delivery Notification Sequence"""
+
+            # Debug: Log what we're about to send
+        print(f"🔍 DEBUG - Attempting to send: {status}")
+        print(f"🔍 DEBUG - Environment: {environment}")
+        print(f"🔍 DEBUG - External ID: {request.external_id}")
+        print(f"🔍 DEBUG - App ID: {getattr(self, f'app_id_{environment}', 'NOT FOUND')}")
+
         template_mapping = {
             "Delivery Pickup": settings.signal_post_delivery_pickup,
             "In transit": settings.signal_post_in_transit,
@@ -68,6 +75,8 @@ class OneSignalMessageService:
         }
         
         template_id = template_mapping.get(status)
+        print(f"🔍 DEBUG - Template ID: {template_id}")
+
         if not template_id:
             raise ValueError(f"Invalid status: {status}")
         
@@ -83,6 +92,8 @@ class OneSignalMessageService:
                 "parcel_destination": request.parcel_destination
             }
         }
+        
+        print(f"🔍 DEBUG - Full payload: {json.dumps(payload, indent=2)}")
         
         headers = {
             "Content-Type": "application/json",
