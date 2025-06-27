@@ -101,21 +101,7 @@ class OneSignalMessageService:
             "Authorization": f"Basic {getattr(self, f'api_key_{environment}')}"
         }
         
-        ### API Request with error handling
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(
-                    self.base_url,
-                    json=payload,
-                    headers=headers
-                ) as response:
-                    response_data = await response.json()
-                    print(f"✅ OneSignal Response: {response_data}")
-                    return response_data
-                    
-        except Exception as e:
-            print(f"❌ OneSignal Request Failed: {type(e).__name__}: {e}")
-            return {"error": str(e), "error_type": type(e).__name__}
+        print(f"🔍 DEBUG - Headers: {json.dumps(headers, indent=2)}")
 
             
 # Create singleton instance        
