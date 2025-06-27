@@ -2,6 +2,7 @@
 
 import aiohttp
 import json
+import sys
 from typing import Dict, Optional
 from ..config import settings
 from ..models.schemas import DeliveryRequest    
@@ -56,7 +57,7 @@ class OneSignalMessageService:
                 headers=headers
             ) as response:
                 response_data = await response.json()
-                print(f"Response from OneSignal: {response_data}")
+                print(f"Response from OneSignal: {response_data}", file=sys.stderr, flush=True)
                 return response_data
                 
     ### Delivery Service Sequence
@@ -64,11 +65,11 @@ class OneSignalMessageService:
         """Send Delivery Notification Sequence"""
 
         # Debug: Log what we're about to send
-        print(f"🔍 DEBUG - Attempting to send: {status}")
-        print(f"🔍 DEBUG - Environment: {environment}")
-        print(f"🔍 DEBUG - External ID: {request.external_id}")
-        print(f"🔍 DEBUG - App ID: {getattr(self, f'app_id_{environment}', 'NOT FOUND')}")
-
+        print(f"🔍 DEBUG - Attempting to send: {status}", file=sys.stderr, flush=True)
+        print(f"🔍 DEBUG - Environment: {environment}", file=sys.stderr, flush=True)
+        print(f"🔍 DEBUG - External ID: {request.external_id}", file=sys.stderr, flush=True)
+        print(f"🔍 DEBUG - App ID: {getattr(self, f'app_id_{environment}', 'NOT FOUND')}", file=sys.stderr, flush=True)
+    
         template_mapping = {
             "Delivery Pickup": settings.signal_post_delivery_pickup,
             "In transit": settings.signal_post_in_transit,
@@ -76,7 +77,7 @@ class OneSignalMessageService:
         }
         
         template_id = template_mapping.get(status)
-        print(f"🔍 DEBUG - Template ID: {template_id}")
+        print(f"🔍 DEBUG - Template ID: {template_id}", file=sys.stderr, flush=True)
 
         if not template_id:
             raise ValueError(f"Invalid status: {status}")
@@ -94,14 +95,35 @@ class OneSignalMessageService:
             }
         }
         
-        print(f"🔍 DEBUG - Full payload: {json.dumps(payload, indent=2)}")
-
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Basic {getattr(self, f'api_key_{environment}')}"
         }
         
-        print(f"🔍 DEBUG - Headers: {json.dumps(headers, indent=2)}")
+        print(f"🔍 DEBUG - Full payload: {json.dumps(payload, indent=2)}", file=sys.stderr, flush=True)
+        
+        ### API Request with error handling
+        try:
+            async with aiohttp.ClientSession() as session:
+                print("📡 Making OneSignal request...", file=sys.stderr, flush=True)
+                
+                async with session.post(
+                    self.base_url,
+                    json=payload,
+                    headers=headers
+                ) as response:
+                    # Add these new debug lines
+                    print(f"📡 Response received!", file=sys.stderr, flush=True)
+                    print(f"📡 Status Code: {response.status}", file=sys.stderr, flush=True)
+                    
+                    response_data = await response.json()
+                    print(f"✅ OneSignal Response: {response_data}", file=sys.stderr, flush=True)
+                    
+                    return response_data
+                    
+        except Exception as e:
+            print(f"❌ OneSignal Request Failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+            return {"error": str(e), "error_type": type(e).__name__}
 
             
 # Create singleton instance        
