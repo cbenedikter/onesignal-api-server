@@ -5,7 +5,8 @@ import json
 from typing import Dict, Optional
 from ..config import settings
 from ..models.schemas import DeliveryRequest    
-
+from ..storage.kv_store import kv_store
+from datetime import datetime
 
 class OneSignalMessageService:
     """Service for sending messages via OneSignal"""
@@ -62,7 +63,7 @@ class OneSignalMessageService:
     async def send_delivery_notification(self, request: DeliveryRequest, status: str, environment=1) -> Dict:
         """Send Delivery Notification Sequence"""
 
-            # Debug: Log what we're about to send
+        # Debug: Log what we're about to send
         print(f"🔍 DEBUG - Attempting to send: {status}")
         print(f"🔍 DEBUG - Environment: {environment}")
         print(f"🔍 DEBUG - External ID: {request.external_id}")
@@ -94,22 +95,27 @@ class OneSignalMessageService:
         }
         
         print(f"🔍 DEBUG - Full payload: {json.dumps(payload, indent=2)}")
-        
+
         headers = {
             "Content-Type": "application/json",
             "Authorization": f"Basic {getattr(self, f'api_key_{environment}')}"
         }
         
-        ### API Request
-        async with aiohttp.ClientSession() as session:
-            async with session.post(
-                self.base_url,
-                json=payload,
-                headers=headers
-            ) as response:
-                response_data = await response.json()
-                print(f"Response from OneSignal: {response_data}")
-                return response_data
+        ### API Request with error handling
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    self.base_url,
+                    json=payload,
+                    headers=headers
+                ) as response:
+                    response_data = await response.json()
+                    print(f"✅ OneSignal Response: {response_data}")
+                    return response_data
+                    
+        except Exception as e:
+            print(f"❌ OneSignal Request Failed: {type(e).__name__}: {e}")
+            return {"error": str(e), "error_type": type(e).__name__}
 
             
 # Create singleton instance        

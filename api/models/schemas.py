@@ -57,11 +57,8 @@ class DeliveryRequest(BaseModel):  # Fixed: BaseModel not baseModel
         example="Medium",
         description="Size of the parcel (Small, Medium, Large)"
     )
-    parcel_description: str = Field(
-        ...,
-        example="Books",
-        description="Description of the parcel contents"
-    )
+    parcel_description: Optional[str] = Field(default="Package", example="Books")
+    
     tracking_id: str = Field(
         ...,
         example="123456",
