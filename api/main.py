@@ -5,7 +5,7 @@ This file sets up the app and includes all routers
 """
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import auth, delivery, dashboard
+from .routers import auth, delivery, dashboard, coupon
 from .config import settings
 from .storage.kv_store import kv_store 
 
@@ -45,6 +45,8 @@ def read_root():
             "/auth/otp": "POST - Generate OTP",
             "/auth/verify": "POST - Verify OTP",
             "/delivery": "POST - Start delivery tracking",
+            "/coupon/request": "POST - Generate coupon code",
+            "/coupon/validate": "POST - Validate coupon code",
             "/docs": "Interactive API documentation",
             "/redoc": "Alternative API documentation"
         }
@@ -54,7 +56,8 @@ def read_root():
 # Include routers
 app.include_router(auth.router)
 app.include_router(delivery.router)
-app.include_router(dashboard.router) 
+app.include_router(dashboard.router)
+app.include_router(coupon.router) 
 
 # Future routers can be added like this:
 # app.include_router(notifications.router)

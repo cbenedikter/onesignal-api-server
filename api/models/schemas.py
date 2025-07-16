@@ -57,13 +57,42 @@ class DeliveryRequest(BaseModel):  # Fixed: BaseModel not baseModel
         example="Medium",
         description="Size of the parcel (Small, Medium, Large)"
     )
-    parcel_description: Optional[str] = Field(default="Package", example="Books")
-    
+    parcel_description: str = Field(
+        ...,
+        example="Books",
+        description="Description of the parcel contents"
+    )
     tracking_id: str = Field(
         ...,
         example="123456",
         description="Tracking ID for the parcel"
     )
+class CouponCodeRequest(BaseModel):
+    """Request to fetch a coupon code"""
+    coupon_request: bool = Field(
+        ...,
+        example=True,  # Changed from 'true' to True (no quotes for boolean)
+        description="must be 'true' to request a coupon code"
+    )
+    user_id: str = Field(
+        ...,
+        example="user123",
+        description="Unique identifier for the user requesting the coupon"
+    )
+
+class CouponValidationRequest(BaseModel):
+    """Request to validate a coupon code"""
+    coupon_code: str = Field(
+        ...,
+        example="SAVE-A1B2C3D4",
+        description="The coupon code to validate"
+    )
+    user_id: str = Field(
+        ...,
+        example="user123",
+        description="User ID attempting to use the coupon"
+    )
+
 
 
 # Response models (what your API returns)
@@ -80,6 +109,31 @@ class VerifyResponse(BaseModel):
     status: str
     valid: bool
     message: str
+
+class CouponCodeResponse(BaseModel):
+    """Response containing the generated coupon code"""
+    coupon_code: str = Field(
+        ...,
+        example="SAVE-A1B2C3D4",
+        description="Unique coupon code valid for 5 minutes"
+    )
+    expires_at: datetime = Field(
+        ...,
+        example="2024-01-20T10:30:00Z",
+        description="ISO timestamp when the coupon expires"
+    )
+    user_id: str = Field(
+        ...,
+        example="user123",
+        description="User ID associated with this coupon"
+    )
+class CouponValidationResponse(BaseModel):
+    """Response for coupon validation"""
+    is_valid: bool = Field(
+        ...,
+        example=True,
+        description="Whether the coupon is valid"
+    )
 
 
 # Internal models (for storage)
