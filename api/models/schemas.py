@@ -4,7 +4,7 @@ Data models (schemas) for your API
 These define what data your API expects and returns
 """
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Optional, Literal
 from datetime import datetime
 
 
@@ -136,10 +136,20 @@ class CouponValidationResponse(BaseModel):
     )
 
 
-# Internal models (for storage)
 class StoredOTP(BaseModel):
     """How we store OTP data internally"""
     phone_number: str
     code: str
     created_at: datetime
     used: bool = False
+
+
+class FlightUpdateContentState(BaseModel):
+    emoji: str = Field(..., min_length=1)  
+
+class FlightUpdateLiveActivity(BaseModel):
+    activity_type: Literal["flightUpdate"] = Field(..., alias="activity_type")
+    activity_id: str = Field(..., alias="activity_id")
+    content_state: FlightUpdateContentState = Field(..., alias="content_state")
+    trace_id: Optional[str] = Field(None, alias="trace_id")
+    timestamp: Optional[datetime] = Field(None, alias="time_stamp")
