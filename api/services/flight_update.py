@@ -81,7 +81,7 @@ class FlightLiveActivityService:
             # step 3: end the Live Activity
             await asyncio.sleep(self.step_delay)
             event = "end"
-            event_updates = {"status": "closed","group":""}  # Final state before dismissal
+            event_updates = {"status": "closed","group":2}  # Final state before dismissal
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
