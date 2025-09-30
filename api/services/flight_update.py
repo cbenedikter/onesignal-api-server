@@ -70,13 +70,13 @@ class FlightLiveActivityService:
             # step 2: landed
             await asyncio.sleep(self.step_delay)
             event = "update"
-            event_updates = {"status": "finalCall","group":"2"}
+            event_updates = {"status": "finalCall","group":2}
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
                 event_updates=event_updates
             )
-            self._kv_update_state(activity_id, status="finalCall", group="4")
+            self._kv_update_state(activity_id, status="finalCall", group=2)
 
             # step 3: end the Live Activity
             await asyncio.sleep(self.step_delay)
