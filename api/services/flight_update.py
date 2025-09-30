@@ -23,7 +23,10 @@ class FlightLiveActivityService:
         record = {
             "activity_id": req.activity_id,
             "type": req.activity_type,             # "flightUpdate"
-            "state": {"emoji": req.content_state.emoji},
+            "state": {
+                "gate": req.content_state.gate,
+                "boardingTime": req.content_state.boardingTime,
+            },
             "status": "active",
             "created_at": now,
             "updated_at": now,
@@ -56,29 +59,29 @@ class FlightLiveActivityService:
             # step 1: baggage claim
             await asyncio.sleep(self.step_delay)
             event = "update"
-            event_updates = {"emoji": "🛄"}
+            event_updates = {"status": "Boarding"}
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
                 event_updates=event_updates
             )
-            self._kv_update_state(activity_id, emoji="🛄")
+            self._kv_update_state(activity_id, status="Boarding")
 
             # step 2: landed
             await asyncio.sleep(self.step_delay)
             event = "update"
-            event_updates = {"emoji": "🛬"}
+            event_updates = {"status": "Final Call","group":"Group A"}
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
                 event_updates=event_updates
             )
-            self._kv_update_state(activity_id, emoji="🛬")
+            self._kv_update_state(activity_id, status="Final Call", group="Group A")
 
             # step 3: end the Live Activity
             await asyncio.sleep(self.step_delay)
             event = "end"
-            event_updates = {"emoji": "🛬"}  # Final state before dismissal
+            event_updates = {"status": "closed","group":"Closed"}  # Final state before dismissal
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
@@ -90,10 +93,13 @@ class FlightLiveActivityService:
             print(f"[flight_update] sequence error for {activity_id}: {e}")
         finally:
             self.active_jobs[activity_id] = False
-    def _kv_update_state(self, activity_id: str, *, emoji: str) -> None:
+    def _kv_update_state(self, activity_id: str, *, status: str = None, group: str = None) -> None:
         key = f"live:flightUpdate:{activity_id}"
         rec = self.kv.get(key) or {}
-        rec.setdefault("state", {})["emoji"] = emoji
+        if status:
+            rec.setdefault("state", {})["status"] = status
+        if group:
+            rec.setdefault("state", {})["group"] = group
         rec["updated_at"] = datetime.utcnow().isoformat()
         self.kv.set(key, rec)
 
