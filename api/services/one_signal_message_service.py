@@ -20,9 +20,13 @@ class OneSignalMessageService:
         # EMEA SE Demo (environment 2)
         self.app_id_2 = settings.emea_se_demo_app_id
         self.api_key_2 = settings.emea_se_demo_api_key
-        ## add later
+        ## Signal Air (environment 3)
+        self.app_id_3 = settings.signal_air_app_id
+        self.api_key_3 = settings.signal_air_api_key
+        ## Reserved for more environments
 
         self.base_url = "https://api.onesignal.com/notifications"
+        self.live_activity_base_url = "https://api.onesignal.com/apps/{app_id}/live_activities/{activity_id}/notifications"
 
     ### SMS OTP from EMEA SE Demo App
     async def send_sms_otp(self, phone_number: str, otp_code: str, environment: int = 2) -> Dict:
@@ -125,6 +129,53 @@ class OneSignalMessageService:
             print(f"❌ OneSignal Request Failed: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
             return {"error": str(e), "error_type": type(e).__name__}
 
-            
+    ### Live Activity flight Update ###
+    async def update_live_activity(self, activity_id: str, event: str, event_updates: dict, environment: int = 3) -> Dict:
+        """
+        Update a Live Activity's content_state
+        
+        Args:
+            activity_id: The Live Activity ID to update
+            event: "update" to update content, "end" to dismiss the Live Activity
+            event_updates: Dict containing the content_state fields (e.g., {"emoji": "🛄"})
+            environment: Which OneSignal app to use (default: 3 = Signal Air)
+        Returns:
+            Response from OneSignal API
+        """
+        app_id = getattr(self, f"app_id_{environment}")
+        api_key = getattr(self, f"api_key_{environment}")
+        # Build Live Activity URL
+        live_activity_url = self.live_activity_base_url.format(
+            app_id=app_id,
+            activity_id=activity_id
+        )
+        payload = {
+            "event": event,
+            "event_updates": event_updates,
+            "name": "Flight Update"
+        }
+        headers = {
+            "Content-Type": "application/json",
+            "Authorization": f"Key {api_key}"
+        }        
+        # Make Update Live Actitivy Request
+        try: 
+            async with aiohttp.ClientSession() as session:
+                async with session.post(
+                    live_activity_url,
+                    json=payload,
+                    headers=headers
+                ) as response:
+                    print(f"Response Status {response.status}", file=sys.stderr, flush=True)
+                    response_data = await response.json()
+                    print(f"OneSignal Response: {response_data}", file=sys.stderr, flush=True)
+                    return response_data
+        except Exception as e:
+            print(f"Error: {type(e).__name__}: {e}", file=sys.stderr, flush=True)
+            return {"error": str(e), "error_type": type(e).__name__}
+
+
+
+        
 # Create singleton instance        
 onesignal_message_service = OneSignalMessageService()
