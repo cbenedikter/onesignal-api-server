@@ -59,29 +59,29 @@ class FlightLiveActivityService:
             # step 1: baggage claim
             await asyncio.sleep(self.step_delay)
             event = "update"
-            event_updates = {"status": "Boarding"}
+            event_updates = {"status": "boarding"}
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
                 event_updates=event_updates
             )
-            self._kv_update_state(activity_id, status="Boarding")
+            self._kv_update_state(activity_id, status="boarding")
 
             # step 2: landed
             await asyncio.sleep(self.step_delay)
             event = "update"
-            event_updates = {"status": "Final Call","group":"Group A"}
+            event_updates = {"status": "finalCall","group":"2"}
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
                 event_updates=event_updates
             )
-            self._kv_update_state(activity_id, status="Final Call", group="Group A")
+            self._kv_update_state(activity_id, status="finalCall", group="4")
 
             # step 3: end the Live Activity
             await asyncio.sleep(self.step_delay)
             event = "end"
-            event_updates = {"status": "closed","group":"Closed"}  # Final state before dismissal
+            event_updates = {"status": "closed","group":""}  # Final state before dismissal
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
