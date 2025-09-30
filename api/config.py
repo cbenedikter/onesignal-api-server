@@ -18,7 +18,10 @@ class Settings:
     signal_post_app_id: Optional[str] = os.getenv("signal_post_app_id")
     signal_post_api_key: Optional[str] = os.getenv("signal_post_api_key")
     emea_se_demo_app_id: Optional[str] = os.getenv("emea_se_demo_app_id")
-    emea_se_demo_api_key: Optional[str] = os.getenv("emea_se_demo_api_key")  
+    emea_se_demo_api_key: Optional[str] = os.getenv("emea_se_demo_api_key")
+    signal_air_app_id: Optional[str] = os.getenv("signal_air_app_id")
+    signal_air_api_key: Optional[str] = os.getenv("signal_air_api_key")
+    
 
     #OneSignal Teplate IDs
     emea_se_demo_sms_otp: str = "a6f35326-6b86-4076-952c-1b3bbee7d391"
