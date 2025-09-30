@@ -145,7 +145,10 @@ class StoredOTP(BaseModel):
 
 
 class FlightUpdateContentState(BaseModel):
-    emoji: str = Field(..., min_length=1)  
+    gate: str = Field(..., example="A12", description="Gate number")
+    boardingTime: Optional[str] = Field(None, alias="boardingTime", example="2025-09-30T16:55:00Z", description="Boarding time in ISO format")
+    status: Optional[str] = Field(None, example="boarding", description="Flight status (e.g., boarding, in-flight, landed)")
+    group: Optional[str] = Field(None, example="Group A", description="Boarding group")  
 
 class FlightUpdateLiveActivity(BaseModel):
     activity_type: Literal["flightUpdate"] = Field(..., alias="activity_type")
