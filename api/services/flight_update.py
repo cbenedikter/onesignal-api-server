@@ -49,17 +49,21 @@ class FlightLiveActivityService:
 
         # 2) mark active and spawn the runner 
         self.active_jobs[aid] = True
-        asyncio.create_task(self._run_emoji_sequence(aid))
+        asyncio.create_task(self._run_emoji_sequence(
+            aid,
+            gate=payload.content_state.gate,
+            boarding_time=payload.content_state.boardingTime
+            ))
 
         return {"status": "started", "activity_id": aid}
 
-    async def _run_emoji_sequence(self, activity_id: str) -> None:
+    async def _run_emoji_sequence(self, activity_id: str, gate: str, boarding_time: str = None) -> None:
         """10s → update → 10s → update → 10s → end (emoji-only MVP)."""
         try:
             # step 1: baggage claim
             await asyncio.sleep(self.step_delay)
             event = "update"
-            event_updates = {"status": "boarding"}
+            event_updates = {"gate": gate, "boardingTime": boarding_time,"status": "boarding"}
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
@@ -70,7 +74,7 @@ class FlightLiveActivityService:
             # step 2: landed
             await asyncio.sleep(self.step_delay)
             event = "update"
-            event_updates = {"status": "finalCall","group":2}
+            event_updates = {"gate": gate, "boardingTime": boarding_time,"status": "finalCall","group":2}
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
@@ -81,7 +85,7 @@ class FlightLiveActivityService:
             # step 3: end the Live Activity
             await asyncio.sleep(self.step_delay)
             event = "end"
-            event_updates = {"status": "closed","group":2}  # Final state before dismissal
+            event_updates = {"gate": gate, "boardingTime": boarding_time,"status": "closed","group":2}  # Final state before dismissal
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
