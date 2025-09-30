@@ -63,7 +63,7 @@ class FlightLiveActivityService:
             # step 1: baggage claim
             await asyncio.sleep(self.step_delay)
             event = "update"
-            event_updates = {"gate": gate, "boardingTime": boarding_time,"status": "boarding"}
+            event_updates = {"gate": gate, "boardingTime": boarding_time,"status": "boarding","group":1}
             await onesignal_message_service.update_live_activity(
                 activity_id=activity_id,
                 event=event,
