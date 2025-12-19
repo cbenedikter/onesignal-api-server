@@ -4,7 +4,7 @@ Data models (schemas) for your API
 These define what data your API expects and returns
 """
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
+from typing import Optional, Literal, List
 from datetime import datetime
 
 
@@ -93,6 +93,58 @@ class CouponValidationRequest(BaseModel):
         description="User ID attempting to use the coupon"
     )
 
+class CalendarDataRequest(BaseModel):
+    """Request to generate calendar event from OneSignal data feed"""
+    summary: str = Field(
+        ...,
+        example="Booking Confirmation",
+        description="Event summary/title"
+    )
+    description: str = Field(
+        ...,
+        example="Windglass Repair Appointment",
+        description="Event description"
+    )
+    organizer_email: str = Field(
+        ...,
+        example="claudio+1@onesignal.com",
+        description="Email of the event organizer"
+    )
+    attendees_emails: List[str] = Field(
+        ...,
+        example=["user@example.com"],
+        description="List of attendee email addresses"
+    )
+    time_zone: str = Field(
+        ...,
+        example="Europe/Helsinki",
+        description="Timezone for the event (IANA timezone format)"
+    )
+    location: str = Field(
+        ...,
+        example="Workshop Name",
+        description="Event location"
+    )
+    start_time: str = Field(
+        ...,
+        example="16:00",
+        description="Start time in HH:MM format (24-hour)"
+    )
+    end_time: str = Field(
+        ...,
+        example="17:00",
+        description="End time in HH:MM format (24-hour)"
+    )
+    meeting_date: str = Field(
+        ...,
+        example="25-12-2025",
+        description="Meeting date in DD-MM-YYYY format"
+    )
+    glass_type: Optional[str] = Field(
+        None,
+        example="windshield",
+        description="Type of glass being serviced (custom field)"
+    )
 
 
 # Response models (what your API returns)
@@ -133,6 +185,28 @@ class CouponValidationResponse(BaseModel):
         ...,
         example=True,
         description="Whether the coupon is valid"
+    )
+
+class CalendarDataResponse(BaseModel):
+    """Response containing calendar URLs"""
+    status: str = Field(
+        ...,
+        example="success",
+        description="Status of the request"
+    )
+    google_url: Optional[str] = Field(
+        None,
+        example="https://calendar.google.com/calendar/render?action=TEMPLATE&text=...",
+        description="Google Calendar add to calendar URL"
+    )
+    ics_url: Optional[str] = Field(
+        None,
+        example="https://your-railway-app.railway.app/calendar/appointment-123.ics",
+        description="URL to download .ics calendar file"
+    )
+    message: Optional[str] = Field(
+        None,
+        description="Additional message or error details"
     )
 
 
