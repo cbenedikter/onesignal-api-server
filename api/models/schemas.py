@@ -67,6 +67,17 @@ class DeliveryRequest(BaseModel):  # Fixed: BaseModel not baseModel
         example="123456",
         description="Tracking ID for the parcel"
     )
+    demo_mode: Optional[bool] = Field(
+        False,
+        example=True,
+        description="Enable demo mode with faster notification intervals"
+    )
+    notification_interval: Optional[int] = Field(
+        60,
+        example=10,
+        description="Seconds between notifications (default 60, demo mode: 10-20)"
+    )
+
 class CouponCodeRequest(BaseModel):
     """Request to fetch a coupon code"""
     coupon_request: bool = Field(
