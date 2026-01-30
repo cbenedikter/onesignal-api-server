@@ -241,3 +241,96 @@ class FlightUpdateLiveActivity(BaseModel):
     content_state: FlightUpdateContentState = Field(..., alias="content_state")
     trace_id: Optional[str] = Field(None, alias="trace_id")
     timestamp: Optional[datetime] = Field(None, alias="time_stamp")
+
+
+# ==================== Webhook Models ====================
+
+class OneSignalWebhookEvent(BaseModel):
+    """
+    OneSignal webhook event payload.
+    This model is flexible to handle various event types.
+    See: https://documentation.onesignal.com/docs/webhooks
+    """
+    # Event identification
+    event: str = Field(
+        ...,
+        example="notification.delivered",
+        description="Event type (notification.sent, notification.delivered, notification.clicked, etc.)"
+    )
+    app_id: str = Field(
+        ...,
+        example="8b9c7d6e-5f4a-4b3c-2d1e-0f9a8b7c6d5e",
+        description="OneSignal App ID"
+    )
+
+    # Notification details (may not be present in all events)
+    notification_id: Optional[str] = Field(
+        None,
+        example="f7e8d9c0-1a2b-3c4d-5e6f-7a8b9c0d1e2f",
+        description="OneSignal notification ID"
+    )
+
+    # User identification
+    external_id: Optional[str] = Field(
+        None,
+        example="YCYEL51G",
+        description="User's external_id (from login)"
+    )
+    onesignal_id: Optional[str] = Field(
+        None,
+        description="OneSignal's internal player/subscription ID"
+    )
+
+    # Message content (for reconstructing inbox)
+    headings: Optional[dict] = Field(
+        None,
+        example={"en": "Package Delivered"},
+        description="Notification title in different languages"
+    )
+    contents: Optional[dict] = Field(
+        None,
+        example={"en": "Your parcel has arrived!"},
+        description="Notification body in different languages"
+    )
+    data: Optional[dict] = Field(
+        None,
+        description="Custom data payload attached to notification"
+    )
+    url: Optional[str] = Field(
+        None,
+        description="URL attached to notification"
+    )
+    big_picture: Optional[str] = Field(
+        None,
+        description="Image URL for rich notifications"
+    )
+    ios_attachments: Optional[dict] = Field(
+        None,
+        description="iOS media attachments"
+    )
+
+    # Event metadata
+    completed_at: Optional[datetime] = Field(
+        None,
+        description="When the event occurred"
+    )
+
+    class Config:
+        extra = "allow"  # Allow additional fields we haven't explicitly defined
+
+
+class MessageEventResponse(BaseModel):
+    """Response model for a single message event"""
+    id: str = Field(..., description="Event ID")
+    event_type: str = Field(..., description="Event type")
+    notification_id: Optional[str] = Field(None, description="Notification ID")
+    message_contents: Optional[dict] = Field(None, description="Notification content")
+    created_at: str = Field(..., description="When event was received")
+
+
+class MessagesResponse(BaseModel):
+    """Response model for message inbox retrieval"""
+    app_id: str = Field(..., description="OneSignal App ID")
+    external_id: str = Field(..., description="User's external_id")
+    message_count: int = Field(..., description="Number of messages returned")
+    messages: List[MessageEventResponse] = Field(..., description="List of message events")

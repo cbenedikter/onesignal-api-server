@@ -35,7 +35,10 @@ class Settings:
     KV_REST_API_URL: Optional[str] = os.getenv("KV_REST_API_URL")
     KV_REST_API_TOKEN: Optional[str] = os.getenv("KV_REST_API_TOKEN")
     KV_REST_API_READ_ONLY_TOKEN: Optional[str] = os.getenv("KV_REST_API_READ_ONLY_TOKEN")
-    
+
+    # Postgres Database Configuration (Railway provides DATABASE_URL)
+    DATABASE_URL: Optional[str] = os.getenv("DATABASE_URL")
+
     # Environment
     ENVIRONMENT: str = os.getenv("ENVIRONMENT", "development")
     
@@ -54,6 +57,11 @@ class Settings:
         """Check if Vercel KV is configured"""
         return bool(self.KV_REST_API_URL and self.KV_REST_API_TOKEN)
 
+    @property
+    def has_database(self) -> bool:
+        """Check if Postgres database is configured"""
+        return bool(self.DATABASE_URL)
+
 
 # Create a single instance
 settings = Settings()
@@ -62,3 +70,4 @@ settings = Settings()
 print(f"Environment: {settings.ENVIRONMENT}")
 print(f"OneSignal configured: {settings.has_onesignal}")
 print(f"Vercel KV configured: {settings.has_kv}")
+print(f"Postgres configured: {settings.has_database}")
