@@ -27,6 +27,22 @@ async def receive_onesignal_webhook(request: Request):
     - Dismissed (notification.dismissed)
     - And other event types
 
+    Expected payload structure (from OneSignal webhook template):
+    {
+        "Event Data": {
+            "event.kind": "...",
+            "event.app_id": "...",
+            "event.external_id": "...",
+            ...
+        },
+        "Message Data": {
+            "message.id": "...",
+            "message.title": "...",
+            "message.contents": "...",
+            ...
+        }
+    }
+
     Configure this URL in your OneSignal dashboard under:
     Settings > Webhooks
     """
@@ -41,44 +57,88 @@ async def receive_onesignal_webhook(request: Request):
     try:
         # Parse the raw JSON payload
         payload = await request.json()
-        print(f"📥 Webhook received: {payload.get('event', 'unknown')} for app {payload.get('app_id', 'unknown')}")
 
-        # Extract key fields
-        event_type = payload.get("event")
-        app_id = payload.get("app_id")
-        external_id = payload.get("external_id")
-        notification_id = payload.get("notification_id") or payload.get("id")
+        # Extract nested objects from OneSignal's webhook template format
+        event_data = payload.get("Event Data", {})
+        message_data = payload.get("Message Data", {})
+
+        # Extract key fields from Event Data
+        event_type = event_data.get("event.kind")
+        app_id = event_data.get("event.app_id")
+        external_id = event_data.get("event.external_id")
+        onesignal_id = event_data.get("event.onesignal_id")
+        subscription_id = event_data.get("event.subscription_id")
+        event_timestamp = event_data.get("event.timestamp")
+        event_datetime = event_data.get("event.datetime")
+
+        # Extract notification ID from Message Data
+        notification_id = message_data.get("message.id")
+
+        print(f"📥 Webhook received: {event_type} for app {app_id} (user: {external_id})")
 
         # Validate required fields
         if not event_type or not app_id:
-            print(f"⚠️ Webhook missing required fields: event={event_type}, app_id={app_id}")
+            print(f"⚠️ Webhook missing required fields: event.kind={event_type}, event.app_id={app_id}")
+            print(f"   Raw payload: {payload}")
             return {
                 "status": "error",
-                "message": "Missing required fields: event and app_id"
+                "message": "Missing required fields: event.kind and event.app_id"
             }
 
         # Extract message contents for inbox reconstruction
         message_contents = {}
 
-        # Title (headings)
-        headings = payload.get("headings")
-        if headings:
-            message_contents["title"] = headings.get("en") or list(headings.values())[0] if headings else None
+        # Title and body from Message Data
+        title = message_data.get("message.title")
+        if title:
+            message_contents["title"] = title
 
-        # Body (contents)
-        contents = payload.get("contents")
+        contents = message_data.get("message.contents")
         if contents:
-            message_contents["body"] = contents.get("en") or list(contents.values())[0] if contents else None
+            message_contents["body"] = contents
 
-        # Additional content fields
-        if payload.get("data"):
-            message_contents["data"] = payload.get("data")
-        if payload.get("url"):
-            message_contents["url"] = payload.get("url")
-        if payload.get("big_picture"):
-            message_contents["image"] = payload.get("big_picture")
-        if payload.get("ios_attachments"):
-            message_contents["ios_attachments"] = payload.get("ios_attachments")
+        # Message name (campaign name)
+        name = message_data.get("message.name")
+        if name:
+            message_contents["name"] = name
+
+        # URLs
+        url = message_data.get("message.url")
+        if url:
+            message_contents["url"] = url
+
+        app_url = message_data.get("message.app_url")
+        if app_url:
+            message_contents["app_url"] = app_url
+
+        web_url = message_data.get("message.web_url")
+        if web_url:
+            message_contents["web_url"] = web_url
+
+        # Template ID
+        template_id = message_data.get("message.template_id")
+        if template_id:
+            message_contents["template_id"] = template_id
+
+        # Event-specific data (click targets, failure reasons, etc.)
+        event_specific = {}
+        if event_data.get("event.data.page_name"):
+            event_specific["page_name"] = event_data.get("event.data.page_name")
+        if event_data.get("event.data.page_id"):
+            event_specific["page_id"] = event_data.get("event.data.page_id")
+        if event_data.get("event.data.target_name"):
+            event_specific["target_name"] = event_data.get("event.data.target_name")
+        if event_data.get("event.data.target_id"):
+            event_specific["target_id"] = event_data.get("event.data.target_id")
+        if event_data.get("event.data.failure_reason"):
+            event_specific["failure_reason"] = event_data.get("event.data.failure_reason")
+
+        if event_specific:
+            message_contents["event_data"] = event_specific
+
+        # Add timestamp info
+        if event_datetime:
+            message_contents["event_datetime"] = event_datetime
 
         # Create the database record
         async with database_service.session_factory() as session:
@@ -88,7 +148,7 @@ async def receive_onesignal_webhook(request: Request):
                 event_type=event_type,
                 notification_id=notification_id,
                 message_contents=message_contents if message_contents else None,
-                event_payload=payload
+                event_payload=payload  # Store full payload for debugging/flexibility
             )
             session.add(event)
             await session.commit()
@@ -98,7 +158,9 @@ async def receive_onesignal_webhook(request: Request):
         return {
             "status": "success",
             "message": f"Event {event_type} stored successfully",
-            "event_id": str(event.id)
+            "event_id": str(event.id),
+            "app_id": app_id,
+            "external_id": external_id
         }
 
     except Exception as e:
