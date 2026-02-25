@@ -6,7 +6,7 @@ This file sets up the app and includes all routers
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import auth, delivery, dashboard, coupon, flight_update, calendar, webhooks
+from .routers import auth, delivery, dashboard, coupon, flight_update, calendar, webhooks, custom_webhook
 from .config import settings
 from .storage.kv_store import kv_store
 from .services.database_service import database_service
@@ -85,3 +85,4 @@ app.include_router(coupon.router)
 app.include_router(flight_update.router)
 app.include_router(calendar.router)
 app.include_router(webhooks.router)
+app.include_router(custom_webhook.router)
