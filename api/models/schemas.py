@@ -229,6 +229,35 @@ class StoredOTP(BaseModel):
     used: bool = False
 
 
+class SignalPostLiveActivityRequest(BaseModel):
+    """Request to start Signal Post Live Activity demo sequence"""
+    tracking_number: str = Field(
+        ...,
+        example="4821",
+        description="Parcel tracking number"
+    )
+    activity_id: str = Field(
+        ...,
+        example="ABC123...",
+        description="Activity.id from ActivityKit"
+    )
+    push_token: Optional[str] = Field(
+        None,
+        example="abcdef123...",
+        description="Live Activity push token"
+    )
+    external_id: Optional[str] = Field(
+        None,
+        example="YCYEL51G",
+        description="OneSignal external ID"
+    )
+    app_id: str = Field(
+        ...,
+        example="cf532c5e-...",
+        description="OneSignal App ID"
+    )
+
+
 class FlightUpdateContentState(BaseModel):
     gate: str = Field(..., example="A12", description="Gate number")
     boardingTime: Optional[str] = Field(None, alias="boardingTime", example="2025-09-30T16:55:00Z", description="Boarding time in ISO format")

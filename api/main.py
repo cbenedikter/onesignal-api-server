@@ -6,7 +6,7 @@ This file sets up the app and includes all routers
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from .routers import auth, delivery, dashboard, coupon, flight_update, calendar, webhooks, custom_webhook
+from .routers import auth, delivery, dashboard, coupon, flight_update, live_activity, calendar, webhooks, custom_webhook
 from .config import settings
 from .storage.kv_store import kv_store
 from .services.database_service import database_service
@@ -66,6 +66,7 @@ def read_root():
             "/coupon/request": "POST - Generate coupon code",
             "/coupon/validate": "POST - Validate coupon code",
             "/flight-update": "POST - Start flight update Live Activity",
+            "/live-activity": "POST - Start Signal Post Live Activity demo sequence",
             "/calendar-data": "POST - Generate Google Calendar URL and ICS file",
             "/calendar/{id}.ics": "GET - Download ICS calendar file",
             "/webhooks/onesignal": "POST - Receive OneSignal webhook events",
@@ -83,6 +84,7 @@ app.include_router(delivery.router)
 app.include_router(dashboard.router)
 app.include_router(coupon.router)
 app.include_router(flight_update.router)
+app.include_router(live_activity.router)
 app.include_router(calendar.router)
 app.include_router(webhooks.router)
 app.include_router(custom_webhook.router)
